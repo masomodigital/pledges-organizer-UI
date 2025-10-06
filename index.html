@@ -17,6 +17,7 @@
       .btn-add-event { background: #28a745; }
       .btn-add-contrib { background: #17a2b8; }
       .btn-close { background: #dc3545; }
+      .btn-logout { background: #ff0000; float: right; }
       .form-row { margin-top:5px; }
       .table-wrapper { overflow-x: auto; }
       #eventsTable { width: 100%; }
@@ -38,6 +39,7 @@
     </div>
 
     <div id="dashboard">
+      <button class="btn-logout" onclick="logout()">Logout</button>
       <h3 id="welcomeMsg"></h3>
 
       <h4>Add New Event</h4>
@@ -100,6 +102,14 @@
         } else if(res){
           document.getElementById("loginMsg").textContent = res.message;
         }
+      }
+
+      function logout() {
+        userNationalId = "";
+        document.getElementById("dashboard").style.display = "none";
+        document.getElementById("loginDiv").style.display = "block";
+        document.getElementById("nationalId").value = "";
+        document.getElementById("password").value = "";
       }
 
       async function loadEvents() {
