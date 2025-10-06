@@ -5,98 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Masomo Pledges Dashboard</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background: #f9f9f9;
-    }
-
-    h2, h3, h4 {
-      text-align: center;
-    }
-
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
+    h2,h3,h4 { text-align: center; }
     #dashboard { display: none; margin-top: 20px; }
-
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-top: 10px;
-      min-width: 800px;
-    }
-
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
-      text-align: left;
-    }
-
-    th {
-      background: #0077cc;
-      color: white;
-      position: sticky;
-      top: 0;
-    }
-
-    input {
-      padding: 5px;
-      margin: 5px 0;
-      width: 100%;
-      max-width: 200px;
-      box-sizing: border-box;
-    }
-
-    button {
-      padding: 5px 12px;
-      margin: 2px 2px 2px 0;
-      border: none;
-      border-radius: 4px;
-      color: white;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
+    table { border-collapse: collapse; width: 100%; margin-top: 10px; min-width: 800px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #0077cc; color: white; position: sticky; top: 0; }
+    input { padding: 5px; margin: 5px 0; width: 100%; max-width: 200px; box-sizing: border-box; }
+    button { padding: 5px 12px; margin: 2px 2px 2px 0; border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: bold; }
     button:hover { opacity: 0.9; }
-
     .btn-add-event { background: #28a745; }
     .btn-add-contrib { background: #17a2b8; }
     .btn-close { background: #dc3545; }
-
-    .form-row { margin-top:5px; }
     .table-wrapper { overflow-x: auto; }
-    #eventsTable { width: 100%; }
-
-    #loginDiv {
-      max-width: 300px;
-      margin: 0 auto;
-      background: #fff;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0px 2px 5px rgba(0,0,0,0.2);
-    }
-
-    #dashboard {
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-
+    #loginDiv { max-width: 300px; margin: 0 auto; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0px 2px 5px rgba(0,0,0,0.2); }
+    #dashboard { max-width: 1000px; margin: 0 auto; }
     .addContributorRow input { width: 120px; margin-right: 5px; }
-
-    #waitMsg {
-      display: none;
-      font-weight: bold;
-      color: #0077cc;
-      text-align: center;
-      margin: 10px 0;
-    }
+    #waitMsg { display: none; font-weight: bold; color: #0077cc; text-align: center; margin: 10px 0; }
+    #loginText { text-align:center; font-weight:bold; color:#0077cc; margin-bottom:10px; }
   </style>
 </head>
 <body>
   <h2>Masomo Pledges Dashboard</h2>
-
   <p id="waitMsg">Wait please...</p>
 
   <!-- LOGIN -->
   <div id="loginDiv">
+    <div id="loginText">Login to view your events, contributors, and track payments.</div>
     <input type="text" id="nationalId" placeholder="National ID"><br>
     <input type="password" id="password" placeholder="Password"><br>
     <button class="btn-add-event" onclick="login()">Login</button>
@@ -132,7 +67,6 @@
 
   <script>
     const WORKER_URL = "https://rapid-lab-7394.ev-dmaundu.workers.dev/";
-
     let userNationalId = "";
 
     function showWait() { document.getElementById("waitMsg").style.display = "block"; }
