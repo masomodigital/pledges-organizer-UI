@@ -5,33 +5,79 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Masomo Pledges Dashboard</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
-    h2,h3,h4 { text-align: center; }
-    #dashboard { display: none; margin-top: 20px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 10px; min-width: 800px; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f9f9f9;
+    }
+
+    h2, h3, h4 { text-align: center; }
+
+    #dashboard { display: none; margin-top: 20px; max-width: 1000px; margin: 0 auto; }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 10px;
+      min-width: 800px;
+    }
+
     th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background: #0077cc; color: white; position: sticky; top: 0; }
+
+    th {
+      background: #0077cc;
+      color: white;
+      position: sticky;
+      top: 0;
+    }
+
     input { padding: 5px; margin: 5px 0; width: 100%; max-width: 200px; box-sizing: border-box; }
-    button { padding: 5px 12px; margin: 2px 2px 2px 0; border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: bold; }
+
+    button {
+      padding: 5px 12px;
+      margin: 2px 2px 2px 0;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
     button:hover { opacity: 0.9; }
+
     .btn-add-event { background: #28a745; }
     .btn-add-contrib { background: #17a2b8; }
     .btn-close { background: #dc3545; }
+
+    .form-row { margin-top:5px; }
     .table-wrapper { overflow-x: auto; }
-    #loginDiv { max-width: 300px; margin: 0 auto; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0px 2px 5px rgba(0,0,0,0.2); }
-    #dashboard { max-width: 1000px; margin: 0 auto; }
     .addContributorRow input { width: 120px; margin-right: 5px; }
-    #waitMsg { display: none; font-weight: bold; color: #0077cc; text-align: center; margin: 10px 0; }
-    #loginText { text-align:center; font-weight:bold; color:#0077cc; margin-bottom:10px; }
+
+    #loginDiv {
+      max-width: 300px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0px 2px 5px rgba(0,0,0,0.2);
+    }
+
+    #waitMsg {
+      display: none;
+      font-weight: bold;
+      color: #0077cc;
+      text-align: center;
+      margin: 10px 0;
+    }
   </style>
 </head>
 <body>
   <h2>Masomo Pledges Dashboard</h2>
+
   <p id="waitMsg">Wait please...</p>
 
   <!-- LOGIN -->
   <div id="loginDiv">
-    <div id="loginText">Login to view your events, contributors, and track payments.</div>
     <input type="text" id="nationalId" placeholder="National ID"><br>
     <input type="password" id="password" placeholder="Password"><br>
     <button class="btn-add-event" onclick="login()">Login</button>
@@ -66,19 +112,19 @@
   </div>
 
   <script>
-    const WORKER_URL = "https://rapid-lab-7394.ev-dmaundu.workers.dev/";
+    const WORKER_URL = 'https://rapid-lab-7394.ev-dmaundu.workers.dev/';
     let userNationalId = "";
 
     function showWait() { document.getElementById("waitMsg").style.display = "block"; }
     function hideWait() { document.getElementById("waitMsg").style.display = "none"; }
 
-    async function callWorker(payload) {
+    async function apiCall(action, payload) {
       const res = await fetch(WORKER_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, ...payload })
       });
-      return await res.json();
+      return res.json();
     }
 
     async function login() {
@@ -86,55 +132,43 @@
       const password = document.getElementById("password").value;
       document.getElementById("loginMsg").textContent = "";
       showWait();
-      try {
-        const res = await callWorker({ action: "loginUser", nationalId, password });
-        hideWait();
-        if(res.success){
-          userNationalId = res.nationalId;
-          document.getElementById("loginDiv").style.display = "none";
-          document.getElementById("dashboard").style.display = "block";
-          document.getElementById("welcomeMsg").textContent = "Welcome " + res.name;
-          loadEvents();
-        } else {
-          document.getElementById("loginMsg").textContent = res.message;
-        }
-      } catch(err) {
-        hideWait();
-        alert("Error connecting to server.");
-        console.error(err);
+      const res = await apiCall('login', { nationalId, password });
+      hideWait();
+      if(res.success){
+        userNationalId = nationalId;
+        document.getElementById("loginDiv").style.display = "none";
+        document.getElementById("dashboard").style.display = "block";
+        document.getElementById("welcomeMsg").textContent = "Welcome " + res.name;
+        loadEvents();
+      } else {
+        document.getElementById("loginMsg").textContent = res.message || "Login failed";
       }
     }
 
     async function loadEvents() {
       showWait();
-      try {
-        const events = await callWorker({ action: "getOrganizerEvents", nationalId: userNationalId });
-        hideWait();
-        const tbody = document.querySelector("#eventsTable tbody");
-        tbody.innerHTML = "";
-        events.forEach(ev => {
-          const row = document.createElement("tr");
-          row.setAttribute("data-eventid", ev.eventId);
-          row.innerHTML = `
-            <td>${ev.title}</td>
-            <td>${ev.description}</td>
-            <td>${ev.date}</td>
-            <td>${ev.venue}</td>
-            <td>${ev.status}</td>
-            <td class="totalPledged">${ev.totalPledged}</td>
-            <td class="totalCollected">${ev.totalCollected}</td>
-            <td class="balance">${ev.balance}</td>
-            <td>
-              <button class="btn-add-contrib" onclick="showAddContributor('${ev.eventId}', this)">Add Contributor</button>
-              <button class="btn-close" onclick="closeEvent('${ev.eventId}', this)">Close Event</button>
-            </td>`;
-          tbody.appendChild(row);
-        });
-      } catch(err){
-        hideWait();
-        alert("Error fetching events.");
-        console.error(err);
-      }
+      const events = await apiCall('getEvents', { nationalId: userNationalId });
+      hideWait();
+      const tbody = document.querySelector("#eventsTable tbody");
+      tbody.innerHTML = "";
+      events.forEach(ev => {
+        const row = document.createElement("tr");
+        row.setAttribute("data-eventid", ev.eventId);
+        row.innerHTML = `
+          <td>${ev.title}</td>
+          <td>${ev.description}</td>
+          <td>${ev.date}</td>
+          <td>${ev.venue}</td>
+          <td>${ev.status}</td>
+          <td class="totalPledged">${ev.totalPledged}</td>
+          <td class="totalCollected">${ev.totalCollected}</td>
+          <td class="balance">${ev.balance}</td>
+          <td>
+            <button class="btn-add-contrib" onclick="showAddContributor('${ev.eventId}', this)">Add Contributor</button>
+            <button class="btn-close" onclick="closeEvent('${ev.eventId}', this)">Close Event</button>
+          </td>`;
+        tbody.appendChild(row);
+      });
     }
 
     async function addEvent() {
@@ -144,19 +178,13 @@
       const venue = document.getElementById("eventVenue").value;
       if(!title || !date) return alert("Title and Date required");
       showWait();
-      try {
-        await callWorker({ action: "addNewEvent", nationalId: userNationalId, title, description: desc, date, venue });
-        hideWait();
-        document.getElementById("eventTitle").value = "";
-        document.getElementById("eventDesc").value = "";
-        document.getElementById("eventDate").value = "";
-        document.getElementById("eventVenue").value = "";
-        loadEvents();
-      } catch(err){
-        hideWait();
-        alert("Error adding event.");
-        console.error(err);
-      }
+      await apiCall('addEvent', { nationalId: userNationalId, title, description: desc, date, venue });
+      hideWait();
+      document.getElementById("eventTitle").value = "";
+      document.getElementById("eventDesc").value = "";
+      document.getElementById("eventDate").value = "";
+      document.getElementById("eventVenue").value = "";
+      loadEvents();
     }
 
     function showAddContributor(eventId, btn) {
@@ -182,34 +210,22 @@
       const amount = Number(document.getElementById(`contribAmount_${eventId}`).value);
       if(!name || !phone || !amount) return alert("Fill all fields");
       showWait();
-      try {
-        await callWorker({ action: "addContributor", eventId, name, phone, amount });
-        hideWait();
-        const tr = btn.closest("tr").previousElementSibling;
-        const totalPledgedCell = tr.querySelector(".totalPledged");
-        const balanceCell = tr.querySelector(".balance");
-        totalPledgedCell.textContent = Number(totalPledgedCell.textContent) + amount;
-        balanceCell.textContent = Number(balanceCell.textContent) + amount;
-        tr.nextElementSibling.remove();
-      } catch(err){
-        hideWait();
-        alert("Error adding contributor.");
-        console.error(err);
-      }
+      await apiCall('addContributor', { eventId, name, phone, amount });
+      hideWait();
+      const tr = btn.closest("tr").previousElementSibling;
+      const totalPledgedCell = tr.querySelector(".totalPledged");
+      const balanceCell = tr.querySelector(".balance");
+      totalPledgedCell.textContent = Number(totalPledgedCell.textContent) + amount;
+      balanceCell.textContent = Number(balanceCell.textContent) + amount;
+      tr.nextElementSibling.remove();
     }
 
     async function closeEvent(eventId, btn){
       if(!confirm("Close this event?")) return;
       showWait();
-      try {
-        await callWorker({ action: "closeEventById", eventId });
-        hideWait();
-        loadEvents();
-      } catch(err){
-        hideWait();
-        alert("Error closing event.");
-        console.error(err);
-      }
+      await apiCall('closeEvent', { eventId });
+      hideWait();
+      loadEvents();
     }
   </script>
 </body>
