@@ -119,7 +119,7 @@
           document.getElementById("dashboard").style.display = "block";
           // 👇 Updated to include credits in red
           document.getElementById("welcomeMsg").innerHTML = 
-            "Welcome " + res.name + " — Credits: <span style='color:red;'>" + res.credits + "</span>";
+            "Welcome " + res.name + " — SMS Credits: <span style='color:red;'>" + res.credits + "</span>";
           loadEvents();
         } else if(res){
           document.getElementById("loginMsg").textContent = res.message;
