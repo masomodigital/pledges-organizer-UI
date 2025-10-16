@@ -117,7 +117,9 @@
           userNationalId = res.nationalId;
           document.getElementById("loginDiv").style.display = "none";
           document.getElementById("dashboard").style.display = "block";
-          document.getElementById("welcomeMsg").textContent = "Welcome " + res.name;
+          // 👇 Updated to include credits in red
+          document.getElementById("welcomeMsg").innerHTML = 
+            "Welcome " + res.name + " — Credits: <span style='color:red;'>" + res.credits + "</span>";
           loadEvents();
         } else if(res){
           document.getElementById("loginMsg").textContent = res.message;
